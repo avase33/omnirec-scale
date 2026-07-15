@@ -1,0 +1,30 @@
+image:
+  repository: ghcr.io/avase33/omnirec-scale
+  tag: latest
+  pullPolicy: IfNotPresent
+
+replicaCount: 3
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 40
+  targetCPUUtilizationPercentage: 65
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: "2"
+    memory: 2Gi
+
+env:
+  OMNIREC_CACHE: redis
+  REDIS_URL: redis://redis:6379/0
+  OMNIREC_INDEX: milvus
+  MILVUS_URI: http://milvus:19530
+
+service:
+  type: ClusterIP
+  port: 80

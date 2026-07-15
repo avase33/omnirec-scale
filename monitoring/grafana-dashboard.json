@@ -1,0 +1,41 @@
+{
+  "annotations": { "list": [] },
+  "editable": true,
+  "schemaVersion": 39,
+  "title": "OmniRec-Scale Serving",
+  "tags": ["omnirec"],
+  "timezone": "browser",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Requests/sec",
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 0 },
+      "targets": [{ "expr": "rate(omnirec_requests_total[1m])", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "p95 latency (ms)",
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 0 },
+      "targets": [{ "expr": "omnirec_latency_p95_ms", "refId": "A" }]
+    },
+    {
+      "type": "stat",
+      "title": "Embedding cache hit-rate",
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 0 },
+      "targets": [{ "expr": "omnirec_cache_hit_rate", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Online users (feature store)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
+      "targets": [{ "expr": "omnirec_online_users", "refId": "A" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Catalog size",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
+      "targets": [{ "expr": "omnirec_catalog_items", "refId": "A" }]
+    }
+  ]
+}

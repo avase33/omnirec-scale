@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+
+# Generated data
+*.jsonl
+out/
+
+# Env / secrets
+.env
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Local verification helpers
+verify_omnirec.py
+verify_smoke.py
+run_omnirec_verify.bat
+run_smoke.bat
+run_console.txt
+run_smoke_console.txt
+omnirec_verify_output.txt
+omnirec_smoke_output.txt

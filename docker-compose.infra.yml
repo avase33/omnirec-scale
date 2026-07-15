@@ -1,0 +1,77 @@
+name: omnirec-infra
+
+# Local backing services for OmniRec-Scale (Kafka, Redis, Milvus, Feast, Prometheus).
+# The app itself runs offline-first, so this compose only stands up the
+# infrastructure you'd point production adapters at.
+
+services:
+  serving-api:
+    build: .
+    environment:
+      OMNIREC_CACHE: redis
+      REDIS_URL: redis://redis:6379/0
+      OMNIREC_INDEX: milvus
+      MILVUS_URI: http://milvus:19530
+    ports: ["8000:8000"]
+    depends_on: [redis, milvus]
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    ports: ["2181:2181"]
+
+  kafka:
+    image: bitnami/kafka:3.7
+    environment:
+      KAFKA_CFG_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports: ["9092:9092"]
+    depends_on: [zookeeper]
+
+  etcd:
+    image: quay.io/coreos/etcd:v3.5.5
+    environment:
+      ETCD_AUTO_COMPACTION_MODE: revision
+      ETCD_QUOTA_BACKEND_BYTES: "4294967296"
+    command: etcd -advertise-client-urls=http://etcd:2379 -listen-client-urls http://0.0.0.0:2379
+
+  minio:
+    image: minio/minio:latest
+    environment:
+      MINIO_ACCESS_KEY: minioadmin
+      MINIO_SECRET_KEY: minioadmin
+    command: minio server /data
+
+  milvus:
+    image: milvusdb/milvus:v2.4.1
+    command: ["milvus", "run", "standalone"]
+    environment:
+      ETCD_ENDPOINTS: etcd:2379
+      MINIO_ADDRESS: minio:9000
+    ports: ["19530:19530"]
+    depends_on: [etcd, minio]
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports: ["9090:9090"]
+
+  grafana:
+    image: grafana/grafana:latest
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Admin
+    volumes:
+      - ./monitoring/grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource.yml:ro
+      - ./monitoring/grafana-dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml:ro
+      - ./monitoring/grafana-dashboard.json:/var/lib/grafana/dashboards/omnirec.json:ro
+    ports: ["3000:3000"]
+    depends_on: [prometheus]

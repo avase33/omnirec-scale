@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: omnirec-serving
+  labels: { app: omnirec, component: serving-api }
+spec:
+  replicas: 3
+  selector:
+    matchLabels: { app: omnirec, component: serving-api }
+  template:
+    metadata:
+      labels: { app: omnirec, component: serving-api }
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: serving-api
+          image: ghcr.io/avase33/omnirec-scale:latest
+          args: ["omnirec", "serve", "--host", "0.0.0.0", "--port", "8000"]
+          ports: [{ containerPort: 8000 }]
+          env:
+            - { name: OMNIREC_CACHE, value: redis }
+            - { name: REDIS_URL, value: redis://redis:6379/0 }
+            - { name: OMNIREC_INDEX, value: milvus }
+            - { name: MILVUS_URI, value: http://milvus:19530 }
+          readinessProbe:
+            httpGet: { path: /healthz, port: 8000 }
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /healthz, port: 8000 }
+            initialDelaySeconds: 15
+            periodSeconds: 30
+          resources:
+            requests: { cpu: "500m", memory: "512Mi" }
+            limits: { cpu: "2", memory: "2Gi" }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: omnirec-serving
+spec:
+  selector: { app: omnirec, component: serving-api }
+  ports:
+    - port: 80
+      targetPort: 8000
+  type: ClusterIP

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: omnirec-scale
+description: Helm chart for the OmniRec-Scale multimodal recommendation serving API
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

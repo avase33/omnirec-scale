@@ -1,0 +1,66 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "omnirec-scale"
+version = "0.1.0"
+description = "Production-grade, dual-tower multimodal recommendation engine (two-tower retrieval + ANN + DCN-v2 ranking)"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Akhil Vase" }]
+keywords = ["recommender-systems", "two-tower", "dcn", "ann", "hnsw", "multimodal", "ranking", "mlops"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+  "Intended Audience :: Developers",
+]
+dependencies = []
+
+[project.optional-dependencies]
+serve = ["fastapi>=0.110", "uvicorn[standard]>=0.29", "pydantic>=2.6"]
+torch = ["torch>=2.2", "numpy>=1.24"]
+multimodal = ["sentence-transformers>=2.6", "clip @ git+https://github.com/openai/CLIP.git"]
+vector = ["pymilvus>=2.4"]
+feast = ["feast>=0.36"]
+stream = ["kafka-python>=2.0", "bytewax>=0.18"]
+cache = ["redis>=5.0"]
+onnx = ["onnx>=1.16", "onnxruntime>=1.17"]
+load = ["locust>=2.24"]
+dev = ["pytest>=8.0", "pytest-cov>=4.1", "ruff>=0.4", "mypy>=1.9"]
+
+[project.urls]
+Homepage = "https://github.com/avase33/omnirec-scale"
+Repository = "https://github.com/avase33/omnirec-scale"
+Issues = "https://github.com/avase33/omnirec-scale/issues"
+
+[project.scripts]
+omnirec = "omnirec.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["omnirec*"]
+
+[tool.setuptools.package-data]
+omnirec = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 110
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+ignore = ["E501", "B008"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
